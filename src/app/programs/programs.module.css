@@ -1,0 +1,156 @@
+.header {
+  padding: 6rem 0 4rem;
+  background: radial-gradient(circle at 90% 80%, rgba(217, 119, 6, 0.05) 0%, transparent 40%);
+  text-align: center;
+}
+
+.headerTitle {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.headerTagline {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.programList {
+  display: flex;
+  flex-direction: column;
+  gap: 5rem;
+}
+
+.programRow {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.programRow:nth-child(even) {
+  grid-template-columns: 1fr 1.2fr;
+}
+
+.programRow:nth-child(even) .infoColumn {
+  order: 2;
+}
+
+.infoColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+.icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  color: var(--foreground);
+  margin-bottom: 1.25rem;
+}
+
+.text {
+  font-size: 1rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+
+.featuresList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.featuresList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.checkIcon {
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.visualColumn {
+  height: 300px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+}
+
+.visualTitle {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.visualText {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 0;
+}
+
+/* Gradients for visual blocks */
+.grad1 {
+  background: linear-gradient(135deg, #db2777 0%, #f472b6 100%);
+}
+
+.grad2 {
+  background: linear-gradient(135deg, #d97706 0%, #fbcfe8 100%);
+}
+
+.grad3 {
+  background: linear-gradient(135deg, #a78bfa 0%, #c084fc 100%);
+}
+
+.grad4 {
+  background: linear-gradient(135deg, #fb7185 0%, #fecdd3 100%);
+}
+
+.gradBlob {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  filter: blur(50px);
+  z-index: 1;
+}
+
+@media (max-width: 992px) {
+  .programRow, .programRow:nth-child(even) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .programRow:nth-child(even) .infoColumn {
+    order: unset;
+  }
+  
+  .visualColumn {
+    height: 220px;
+    padding: 2rem;
+  }
+}

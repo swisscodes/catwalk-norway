@@ -1,0 +1,190 @@
+.header {
+  padding: 6rem 0 4rem;
+  background: radial-gradient(circle at 10% 20%, rgba(219, 39, 119, 0.05) 0%, transparent 40%);
+  text-align: center;
+}
+
+.headerTitle {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.headerTagline {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.missionVision {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  margin-bottom: 5rem;
+}
+
+.box {
+  padding: 2.5rem;
+  border-radius: var(--radius-lg);
+  height: 100%;
+}
+
+.boxTitle {
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  color: var(--primary);
+  margin-bottom: 1.25rem;
+}
+
+.boxText {
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+/* Values Grid */
+.valuesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.valueCard {
+  padding: 2rem;
+  text-align: center;
+}
+
+.valueIcon {
+  font-size: 2rem;
+  margin-bottom: 1.25rem;
+  display: inline-block;
+}
+
+.valueTitle {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--foreground);
+}
+
+/* Theory of Change visual element */
+.tocBox {
+  background: var(--card-border);
+  padding: 3rem;
+  border-radius: var(--radius-lg);
+  margin-top: 2rem;
+  border: 1px solid var(--card-border);
+}
+
+.tocGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 2.5rem;
+}
+
+.tocStep {
+  position: relative;
+  background: var(--background);
+  padding: 2rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.tocStepNum {
+  position: absolute;
+  top: -15px;
+  left: 20px;
+  background: var(--accent);
+  color: #ffffff;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.tocStepTitle {
+  font-size: 1.15rem;
+  margin-bottom: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* Team Grid */
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+  margin-top: 3rem;
+}
+
+.teamCard {
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-md);
+}
+
+.teamName {
+  font-size: 1.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.teamRole {
+  font-size: 0.9rem;
+  color: var(--primary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.teamBio {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+@media (max-width: 992px) {
+  .valuesGrid, .teamGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .tocGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .headerTitle {
+    font-size: 2.25rem;
+  }
+  
+  .missionVision {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .valuesGrid, .teamGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .tocBox {
+    padding: 1.5rem;
+  }
+}
