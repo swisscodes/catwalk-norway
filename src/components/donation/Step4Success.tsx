@@ -47,6 +47,12 @@ export default function Step4Success({
           </span>
         </div>
         <div className={styles.receiptRow}>
+          <span className={styles.receiptLabel}>Payment Type:</span>
+          <span className={styles.receiptValue}>
+            {frequency === "monthly" ? "Monthly Recurring (Saved Off-Session Card)" : "One-Time Tax-Deductible Gift"}
+          </span>
+        </div>
+        <div className={styles.receiptRow}>
           <span className={styles.receiptLabel}>Receipt Sent To:</span>
           <span className={styles.receiptValue}>{donorInfo.email}</span>
         </div>

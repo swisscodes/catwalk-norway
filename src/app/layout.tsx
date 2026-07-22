@@ -4,6 +4,8 @@ import "./globals.css";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 
+import { SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION, SITE_KEYWORDS } from "@/config/site";
+
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
@@ -17,12 +19,15 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Radiant Horizon Foundation | Ending Child Marriage & Empowering Girls",
-  description: "Radiant Horizon Foundation is a global NGO dedicated to protecting young girls from child marriage, promoting education, and advocating for equal legal rights.",
-  keywords: "child marriage, ngo, girls education, human rights, child protection, philanthropy, non-profit",
+  title: {
+    default: `${SITE_NAME} | ${SITE_TAGLINE}`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
   openGraph: {
-    title: "Radiant Horizon Foundation | Ending Child Marriage",
-    description: "Empowering girls and protecting them from child marriage through education, legal advocacy, and safe sanctuaries.",
+    title: `${SITE_NAME} | ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
     type: "website",
     locale: "en_US",
   },

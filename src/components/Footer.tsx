@@ -2,10 +2,16 @@
 
 import Link from "next/link";
 import styles from "./footer.module.css";
-import { SITE_NAME } from "@/config/site";
+import { SITE_NAME, ORGANIZATION_NAME } from "@/config/site";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+
+  const handleActionClick = () => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("reset-donation-form"));
+    }
+  };
 
   return (
     <footer className={styles.footer}>
@@ -33,9 +39,9 @@ export default function Footer() {
         <div className={styles.linksColumn}>
           <h4 className={styles.heading}>Get Involved</h4>
           <ul className={styles.linksList}>
-            <li><Link href="/action" className={styles.link}>Donate Today</Link></li>
-            <li><Link href="/action" className={styles.link}>Sponsor a Girl</Link></li>
-            <li><Link href="/action" className={styles.link}>Volunteer</Link></li>
+            <li><Link href="/action" className={styles.link} onClick={handleActionClick}>Donate Today</Link></li>
+            <li><Link href="/action" className={styles.link} onClick={handleActionClick}>Sponsor a Girl</Link></li>
+            <li><Link href="/action" className={styles.link} onClick={handleActionClick}>Volunteer</Link></li>
             <li><Link href="/contact" className={styles.link}>Contact Us</Link></li>
           </ul>
         </div>
@@ -62,7 +68,7 @@ export default function Footer() {
 
       <div className={`${styles.bottomBar} container`}>
         <div className={styles.copyright}>
-          &copy; {currentYear} Radiant Horizon Foundation. All Rights Reserved. A registered 501(c)(3) nonprofit organization.
+          &copy; {currentYear} {ORGANIZATION_NAME}. All Rights Reserved. A registered 501(c)(3) nonprofit organization.
         </div>
         <div className={styles.socials}>
           <a href="#" className={styles.socialIcon} aria-label="Facebook" rel="noopener noreferrer">

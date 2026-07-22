@@ -64,6 +64,13 @@ export default function Navigation() {
     { label: "Contact", href: "/contact" },
   ];
 
+  const handleNavClick = (href: string) => {
+    closeMenu();
+    if (href === "/action" && typeof window !== "undefined") {
+      window.dispatchEvent(new Event("reset-donation-form"));
+    }
+  };
+
   return (
     <header className={`${styles.header} ${isMenuOpen ? styles.mobileMenuOpen : ""}`}>
       <div className={`${styles.navContainer} container`}>
@@ -81,7 +88,7 @@ export default function Navigation() {
                   <Link
                     href={item.href}
                     className={`${styles.link} ${isActive ? styles.active : ""}`}
-                    onClick={closeMenu}
+                    onClick={() => handleNavClick(item.href)}
                   >
                     {item.label}
                   </Link>
@@ -93,7 +100,7 @@ export default function Navigation() {
                 href="/action"
                 className={`btn btn-primary ${styles.ctaBtn}`}
                 style={{ padding: "0.5rem 1.25rem", fontSize: "0.9rem" }}
-                onClick={closeMenu}
+                onClick={() => handleNavClick("/action")}
               >
                 Donate Now
               </Link>

@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import styles from "./action.module.css";
 import DonationPanel from "@/components/DonationPanel";
+
+export const metadata: Metadata = {
+  title: "Take Action & Donate",
+  description: "Support young girls escaping child marriage. Donate today, sponsor a girl, or volunteer with Catwalk to Freedom.",
+};
 
 export default function Action() {
   return (

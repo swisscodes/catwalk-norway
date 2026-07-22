@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import styles from "./programs.module.css";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Our Programs",
+  description: "Explore Catwalk to Freedom's core initiatives: Safe Houses, Legal Protection, Girls' Education Scholarships, and Community Advocacy.",
+};
 
 export default function Programs() {
   const programsList = [

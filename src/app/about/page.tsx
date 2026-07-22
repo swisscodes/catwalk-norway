@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import styles from "./about.module.css";
+
+export const metadata: Metadata = {
+  title: "About Us",
+  description: "Learn about Catwalk to Freedom's mission, values, and leadership team dedicated to ending child marriage and empowering girls.",
+};
 
 export default function About() {
   const values = [

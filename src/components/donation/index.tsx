@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { Elements } from "@stripe/react-stripe-js";
+import { getStripe } from "@/lib/stripe-client";
 import styles from "../donationPanel.module.css";
 import Step1Amount from "./Step1Amount";
 import Step2Information from "./Step2Information";
 import Step3Payment from "./Step3Payment";
 import Step4Success from "./Step4Success";
 import StepIndicator from "./StepIndicator";
-import { DonationFrequency, DonorInfo, IMPACTS, PaymentInfo, PaymentMethod } from "./types";
+import { DonationFrequency, DonorInfo, IMPACTS, PaymentMethod } from "./types";
+
+const stripePromise = getStripe();
 
 export default function DonationPanelContainer() {
   const [step, setStep] = useState<number>(1);
@@ -25,21 +29,42 @@ export default function DonationPanelContainer() {
     zip: "",
   });
 
-  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({
-    paymentMethod: "card",
-    cardName: "",
-    cardNumber: "",
-    cardExp: "",
-    cardCvc: "",
-    billingZip: "",
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
+  const [clientSecret, setClientSecret] = useState<string>("");
+  const [isInitializingStripe, setIsInitializingStripe] = useState<boolean>(false);
   const [receiptId, setReceiptId] = useState<string>("");
 
   // Validation Error States
   const [stepError, setStepError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const resetForm = useCallback(() => {
+    setStep(1);
+    setSelectedPreset(50);
+    setCustomValue("");
+    setClientSecret("");
+    setStepError(null);
+    setFieldErrors({});
+    setDonorInfo({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      address: "",
+      city: "",
+      zip: "",
+    });
+  }, []);
+
+  // Reset form state on navigation or explicit reset event
+  useEffect(() => {
+    const handleResetEvent = () => {
+      resetForm();
+    };
+
+    window.addEventListener("reset-donation-form", handleResetEvent);
+    return () => window.removeEventListener("reset-donation-form", handleResetEvent);
+  }, [resetForm]);
 
   const handlePresetSelect = (amount: number) => {
     setSelectedPreset(amount);
@@ -83,7 +108,37 @@ export default function DonationPanelContainer() {
     return "Select or enter an amount to see the impact of your generosity.";
   };
 
-  // Step Navigation & Validation handlers
+  // Create Stripe PaymentIntent when transitioning to Step 3
+  const initStripePaymentIntent = async (donor: DonorInfo) => {
+    setIsInitializingStripe(true);
+    setStepError(null);
+
+    try {
+      const res = await fetch("/api/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: getAmount(),
+          frequency,
+          donorInfo: donor,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to initialize secure checkout");
+      }
+
+      setClientSecret(data.clientSecret);
+      setStep(3);
+    } catch (err: any) {
+      setStepError(err.message || "Could not connect to payment gateway. Please try again.");
+    } finally {
+      setIsInitializingStripe(false);
+    }
+  };
+
   const handleStep1Next = () => {
     if (getAmount() <= 0) {
       setStepError("Please select or enter a valid donation amount.");
@@ -124,51 +179,8 @@ export default function DonationPanelContainer() {
 
   const handleStep2Next = () => {
     if (validateStep2()) {
-      setStep(3);
+      initStripePaymentIntent(donorInfo);
     }
-  };
-
-  const validateStep3 = () => {
-    if (paymentInfo.paymentMethod !== "card") {
-      setStepError(null);
-      setFieldErrors({});
-      return true;
-    }
-
-    const errors: Record<string, string> = {};
-
-    if (!paymentInfo.cardName.trim()) {
-      errors.cardName = "Cardholder name is required.";
-    }
-
-    const cleanCardNum = paymentInfo.cardNumber.replace(/\s+/g, "");
-    if (!cleanCardNum) {
-      errors.cardNumber = "Card number is required.";
-    } else if (cleanCardNum.length < 12) {
-      errors.cardNumber = "Please enter a valid card number (at least 12 digits).";
-    }
-
-    if (!paymentInfo.cardExp.trim()) {
-      errors.cardExp = "Expiry date is required.";
-    } else if (paymentInfo.cardExp.trim().length < 4) {
-      errors.cardExp = "Expiry format must be MM/YY.";
-    }
-
-    if (!paymentInfo.cardCvc.trim()) {
-      errors.cardCvc = "CVC code is required.";
-    } else if (paymentInfo.cardCvc.trim().length < 3) {
-      errors.cardCvc = "CVC must be 3 or 4 digits.";
-    }
-
-    setFieldErrors(errors);
-
-    if (Object.keys(errors).length > 0) {
-      setStepError("Please correct the payment details highlighted below.");
-      return false;
-    }
-
-    setStepError(null);
-    return true;
   };
 
   const handleDonorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,49 +190,12 @@ export default function DonationPanelContainer() {
     if (stepError) setStepError(null);
   };
 
-  const handlePaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPaymentInfo((prev) => ({ ...prev, [name]: value }));
-    if (fieldErrors[name]) setFieldErrors((prev) => ({ ...prev, [name]: "" }));
-    if (stepError) setStepError(null);
+  const handlePaymentSuccess = (transactionId: string) => {
+    setReceiptId(transactionId);
+    setStep(4);
   };
 
-  const handleFinalSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!validateStep3()) return;
-    setIsSubmitting(true);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setReceiptId(`RH-${Math.floor(100000 + Math.random() * 900000)}`);
-      setStep(4);
-    }, 1200);
-  };
-
-  const resetForm = () => {
-    setStep(1);
-    setSelectedPreset(50);
-    setCustomValue("");
-    setStepError(null);
-    setFieldErrors({});
-    setDonorInfo({
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      address: "",
-      city: "",
-      zip: "",
-    });
-    setPaymentInfo({
-      paymentMethod: "card",
-      cardName: "",
-      cardNumber: "",
-      cardExp: "",
-      cardCvc: "",
-      billingZip: "",
-    });
-  };
 
   return (
     <div className={`${styles.panel} glass-panel`}>
@@ -275,30 +250,61 @@ export default function DonationPanelContainer() {
 
       {/* Step 3 Component */}
       {step === 3 && (
-        <Step3Payment
-          paymentInfo={paymentInfo}
-          fieldErrors={fieldErrors}
-          amount={getAmount()}
-          frequency={frequency}
-          isSubmitting={isSubmitting}
-          onPaymentChange={handlePaymentChange}
-          onPaymentMethodSelect={(method: PaymentMethod) => {
-            setPaymentInfo((prev) => ({ ...prev, paymentMethod: method }));
-            setStepError(null);
-            setFieldErrors({});
-          }}
-          onSubmit={handleFinalSubmit}
-          onBack={() => {
-            setStepError(null);
-            setFieldErrors({});
-            setStep(2);
-          }}
-          onEditAmount={() => {
-            setStepError(null);
-            setFieldErrors({});
-            setStep(1);
-          }}
-        />
+        <>
+          {isInitializingStripe ? (
+            <div style={{ textAlign: "center", padding: "3rem 0", color: "var(--text-muted)" }}>
+              <div style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>🔒</div>
+              <p>Initializing secure checkout with Stripe...</p>
+            </div>
+          ) : clientSecret ? (
+            <Elements
+              stripe={stripePromise}
+              options={{
+                clientSecret,
+                appearance: {
+                  theme: "stripe",
+                  variables: {
+                    colorPrimary: "#db2777",
+                    borderRadius: "8px",
+                  },
+                },
+              }}
+            >
+              <Step3Payment
+                amount={getAmount()}
+                frequency={frequency}
+                donorEmail={donorInfo.email}
+                paymentMethod={paymentMethod}
+                isSubmitting={isInitializingStripe}
+                onPaymentMethodSelect={(method) => setPaymentMethod(method)}
+                onSuccess={handlePaymentSuccess}
+                onBack={() => {
+                  setStepError(null);
+                  setFieldErrors({});
+                  setStep(2);
+                }}
+                onEditAmount={() => {
+                  setStepError(null);
+                  setFieldErrors({});
+                  setStep(1);
+                }}
+              />
+            </Elements>
+          ) : (
+            <div style={{ textAlign: "center", padding: "2rem 0" }}>
+              <p style={{ color: "#ef4444", marginBottom: "1rem" }}>
+                Unable to load payment gateway. Please check your network or try again.
+              </p>
+              <button
+                type="button"
+                className="btn btn-accent"
+                onClick={() => initStripePaymentIntent(donorInfo)}
+              >
+                Retry Loading Checkout
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Step 4 Component */}
