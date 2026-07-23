@@ -96,8 +96,9 @@ export async function POST(request: Request) {
         payment_behavior: "default_incomplete",
         payment_settings: {
           save_default_payment_method: "on_subscription",
+          payment_method_types: ["card"],
         },
-        expand: ["latest_invoice.payment_intent"],
+        expand: ["latest_invoice.payment_intent", "pending_setup_intent"],
         metadata: {
           donorName,
           donorEmail,
@@ -106,23 +107,79 @@ export async function POST(request: Request) {
         },
       });
 
-      const invoice = subscription.latest_invoice as Stripe.Invoice;
-      const paymentIntent = (invoice as any)?.payment_intent as Stripe.PaymentIntent;
+      let clientSecret: string | null = null;
+      let paymentIntentId: string | null = null;
 
-      // Extract clientSecret across all Stripe API versions (payment_intent or confirmation_secret)
-      const clientSecret =
-        paymentIntent?.client_secret ||
-        (invoice as any)?.confirmation_secret ||
-        (invoice as any)?.payment_intent_client_secret;
+      // Check pending_setup_intent
+      if (subscription.pending_setup_intent) {
+        const setupIntent =
+          typeof subscription.pending_setup_intent === "string"
+            ? await stripe.setupIntents.retrieve(subscription.pending_setup_intent)
+            : (subscription.pending_setup_intent as Stripe.SetupIntent);
 
+        clientSecret = setupIntent.client_secret;
+        paymentIntentId = setupIntent.id;
+      }
+
+      // Check latest_invoice payment_intent
+      if (!clientSecret && subscription.latest_invoice) {
+        let invoice: Stripe.Invoice;
+
+        if (typeof subscription.latest_invoice === "string") {
+          invoice = await stripe.invoices.retrieve(subscription.latest_invoice, {
+            expand: ["payment_intent"],
+          });
+        } else {
+          invoice = subscription.latest_invoice as Stripe.Invoice;
+        }
+
+        const pi = (invoice as any)?.payment_intent;
+
+        if (typeof pi === "string") {
+          const fetchedPI = await stripe.paymentIntents.retrieve(pi);
+          clientSecret = fetchedPI.client_secret;
+          paymentIntentId = fetchedPI.id;
+        } else if (pi && typeof pi === "object") {
+          clientSecret = pi.client_secret || null;
+          paymentIntentId = pi.id || null;
+        }
+
+        if (!clientSecret) {
+          clientSecret =
+            (invoice as any)?.confirmation_secret ||
+            (invoice as any)?.payment_intent_client_secret ||
+            (invoice as any)?.client_secret ||
+            null;
+        }
+      }
+
+      // Fallback for regions/accounts (e.g. Norway / Flexible Billing) where initial invoice does not attach an automatic PaymentIntent:
+      // Create a PaymentIntent with setup_future_usage: "off_session" to charge the initial contribution and vault the card for recurring billing.
       if (!clientSecret) {
-        throw new Error("Failed to extract payment client secret from subscription invoice.");
+        const fallbackPI = await stripe.paymentIntents.create({
+          amount: amountInCents,
+          currency: "usd",
+          customer: customerId,
+          setup_future_usage: "off_session",
+          description: `Monthly Contribution ($${amount}/month) - Catwalk to Freedom`,
+          automatic_payment_methods: { enabled: true },
+          metadata: {
+            subscriptionId: subscription.id,
+            donorName,
+            donorEmail,
+            frequency: "monthly",
+            isRecurring: "true",
+          },
+        });
+
+        clientSecret = fallbackPI.client_secret;
+        paymentIntentId = fallbackPI.id;
       }
 
       return NextResponse.json({
         clientSecret,
         subscriptionId: subscription.id,
-        paymentIntentId: paymentIntent?.id || subscription.id,
+        paymentIntentId: paymentIntentId || subscription.id,
         customerId,
         frequency: "monthly",
       });
