@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import styles from "./about.module.css";
+import VideoHero from "./VideoHero";
 
 export const metadata: Metadata = {
   title: "About Us",
@@ -27,19 +28,19 @@ export default function About() {
 
   const team = [
     {
-      initials: "HM",
-      name: "Dr. Helen Mwangi",
-      role: "Executive Director",
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop",
+      name: "Nyagoa William Nyuon",
+      role: "Founder",
       bio: "A passionate human rights advocate with 15+ years of experience in gender equity and child protection campaigns throughout East Africa."
     },
     {
-      initials: "SJ",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop",
       name: "Sarah Jenkins, JD",
       role: "Director of Legal Advocacy",
       bio: "Former human rights attorney specializing in child protection laws, forced marriage dissolutions, and court representation."
     },
     {
-      initials: "AY",
+      image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=600&auto=format&fit=crop",
       name: "Amina Yusuf",
       role: "Head of Community Mediation",
       bio: "A seasoned community organizer and local elder mediator specializing in parent advocacy, social outreach, and tribal engagement."
@@ -48,18 +49,11 @@ export default function About() {
 
   return (
     <div>
-      {/* Page Header */}
-      <section className={styles.header}>
-        <div className="container">
-          <h1 className={styles.headerTitle}>Our Mission & Vision</h1>
-          <p className={styles.headerTagline}>
-            Protecting young girls from child marriage, keeping them in classrooms, and ensuring their voice is heard in their families and communities.
-          </p>
-        </div>
-      </section>
+      {/* Inspirational Video Hero Section */}
+      <VideoHero />
 
       {/* Mission & Vision Section */}
-      <section className="section">
+      <section id="mission-section" className="section">
         <div className="container">
           <div className={styles.missionVision}>
             <div className={`${styles.box} glass-panel`}>
@@ -146,7 +140,12 @@ export default function About() {
           <div className={styles.teamGrid}>
             {team.map((member, idx) => (
               <div key={idx} className={`${styles.teamCard} glass-panel`}>
-                <div className={styles.avatar}>{member.initials}</div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={member.image}
+                  alt={member.name}
+                  className={styles.avatarImg}
+                />
                 <h3 className={styles.teamName}>{member.name}</h3>
                 <div className={styles.teamRole}>{member.role}</div>
                 <p className={styles.teamBio}>{member.bio}</p>
